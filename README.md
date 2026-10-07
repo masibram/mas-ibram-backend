@@ -1,6 +1,6 @@
 # Mas Ibram Downloader Backend
 
-Backend FastAPI untuk frontend Netlify.
+Backend FastAPI untuk frontend Mas Ibram Downloader.
 
 ## Endpoint
 
@@ -9,18 +9,20 @@ Backend FastAPI untuk frontend Netlify.
 - `GET /download?url=...&media=video`
 - `GET /download?url=...&media=audio`
 
-Backend memakai `yt-dlp` + FFmpeg di server sehingga frontend tidak lagi bergantung pada CORS/public downloader APIs.
+## Docker
 
-## Deploy
+Container sudah memasang FFmpeg dan membaca port dari environment `PORT`.
 
-Container membutuhkan Python, yt-dlp, dan FFmpeg. Deploy sebagai Docker Web Service pada provider yang mendukung container.
+Jika platform meminta **Root Directory**, kosongkan karena file berada di root repository.
 
-Setelah live, buka:
+## Tes setelah live
+
+Buka:
 
 `https://DOMAIN-BACKEND/health`
 
-Harus mengembalikan JSON dengan `"ok": true`.
+Harus muncul JSON dengan `"ok": true` dan `"ffmpeg": true`.
 
 ## Catatan
 
-Hanya gunakan konten yang memang boleh Anda unduh. Hasil tetap bergantung pada akses publik platform sumber, perubahan platform, dan kapasitas server.
+Gunakan hanya untuk konten yang memang boleh Anda unduh. Keberhasilan tetap bergantung pada perubahan platform sumber, login/cookies, pembatasan region, dan jenis URL.

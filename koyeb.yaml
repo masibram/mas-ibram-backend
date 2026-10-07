@@ -1,7 +1,7 @@
 services:
-  - name: mas-ibram-downloader
+  - name: mas-ibram-backend
     type: web
-    instance_type: free
+    instance_type: nano
     ports:
       - port: 8000
         protocol: http

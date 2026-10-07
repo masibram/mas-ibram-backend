@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mas-ibram-backend
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
