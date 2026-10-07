@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import yt_dlp
 
 APP_NAME = "Mas Ibram Downloader Backend"
-VERSION = "3.0.0"
+VERSION = "4.0.0"
 DOWNLOAD_DIR = Path(os.getenv("DOWNLOAD_DIR", "/tmp/mas-ibram-downloads"))
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -67,14 +67,36 @@ def safe_name(name: str) -> str:
 
 
 def youtube_strategies():
-    # YouTube has recently tightened bot checks. Try several public clients
-    # before returning the original extractor error. No personal cookies are
-    # stored or requested by this backend.
+    # Try public extractor clients in a conservative order. YouTube may still
+    # require a valid browser session/PO token depending on its current
+    # anti-bot policy; this backend does not collect personal cookies.
     return [
-        {},
         {"extractor_args": {"youtube": {"player_client": ["android_vr"]}}},
         {"extractor_args": {"youtube": {"player_client": ["web_safari"]}}},
+        {"extractor_args": {"youtube": {"player_client": ["mweb"]}}},
+        {"extractor_args": {"youtube": {"player_client": ["web_embedded"]}}},
+        {},
     ]
+
+
+def blocked_reason(platform: str, message: str) -> str | None:
+    m = message.lower()
+    if platform == "Spotify" and ("drm" in m or "protected" in m):
+        return (
+            "Spotify menolak pengambilan audio karena perlindungan DRM. "
+            "Backend ini tidak membypass DRM. Gunakan fitur unduh resmi Spotify Premium."
+        )
+    if platform == "Snack Video" and ("drm" in m or "protected" in m):
+        return (
+            "Snack Video menandai media ini sebagai terlindungi/DRM. "
+            "yt-dlp tidak dapat mengambil media tersebut tanpa membypass perlindungan."
+        )
+    if platform == "YouTube" and "sign in to confirm" in m:
+        return (
+            "YouTube menolak permintaan server karena verifikasi anti-bot. "
+            "Percobaan client publik tidak cukup untuk video ini; backend tidak meminta cookie akun Anda."
+        )
+    return None
 
 
 def base_opts(audio: bool, output: Path):
@@ -125,6 +147,9 @@ def extract_download(url: str, audio: bool, output: Path):
 
     # Keep the most useful extractor message while limiting response size.
     message = errors[-1] if errors else "Ekstraksi media gagal."
+    friendly = blocked_reason(platform, message)
+    if friendly:
+        raise RuntimeError(friendly)
     if len(errors) > 1 and "Sign in to confirm" in errors[0] and "Sign in to confirm" not in message:
         message = errors[0] + " | Percobaan alternatif juga gagal."
     raise RuntimeError(message[:1400])
@@ -214,7 +239,9 @@ def info(url: str = Query(...)):
                 }
             except Exception as exc:
                 errors.append(str(exc))
-        raise RuntimeError(errors[-1] if errors else "Gagal membaca media.")
+        message = errors[-1] if errors else "Gagal membaca media."
+        friendly = blocked_reason(platform, message)
+        raise RuntimeError(friendly or message)
     except Exception as e:
         raise HTTPException(502, f"Gagal membaca media: {str(e)[:1000]}")
 
