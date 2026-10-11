@@ -1,28 +1,9 @@
-# Mas Ibram Downloader Backend
+# Mas Ibram Downloader Backend v8
 
-Backend FastAPI untuk frontend Mas Ibram Downloader.
+FastAPI + yt-dlp + FFmpeg backend.
 
-## Endpoint
+Endpoints: `/`, `/health`, `/platforms`, `/info`, `/download`, `/music`.
 
-- `GET /health`
-- `GET /info?url=...`
-- `GET /download?url=...&media=video`
-- `GET /download?url=...&media=audio`
+New recognized domains: FreeReels Drama, Melolo TV, PineDrama, and TeraBox. Recognition does not guarantee extraction: yt-dlp must have a compatible extractor and the link must be publicly accessible. App-only streams, login-gated content, DRM, and access-protected links are not bypassed.
 
-## Docker
-
-Container sudah memasang FFmpeg dan membaca port dari environment `PORT`.
-
-Jika platform meminta **Root Directory**, kosongkan karena file berada di root repository.
-
-## Tes setelah live
-
-Buka:
-
-`https://DOMAIN-BACKEND/health`
-
-Harus muncul JSON dengan `"ok": true` dan `"ffmpeg": true`.
-
-## Catatan
-
-Gunakan hanya untuk konten yang memang boleh Anda unduh. Keberhasilan tetap bergantung pada perubahan platform sumber, login/cookies, pembatasan region, dan jenis URL.
+For permanent music, mount a Railway Volume at `/data` and optionally set `ADMIN_API_KEY`.

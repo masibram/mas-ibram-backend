@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import yt_dlp
 
 APP_NAME = "Mas Ibram Downloader Backend"
-VERSION = "7.0.0"
+VERSION = "8.0.0"
 DOWNLOAD_DIR = Path(os.getenv("DOWNLOAD_DIR", "/tmp/mas-ibram-downloads"))
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MUSIC_DB_PATH = Path(os.getenv("MUSIC_DB_PATH", "/data/mas_ibram_music.db"))
@@ -38,6 +38,13 @@ SUPPORTED = {
     "spotify.com": "Spotify",
     "capcut.com": "CapCut", "capcut.net": "CapCut",
     "snackvideo.com": "Snack Video", "snackvideo.in": "Snack Video", "snackvideo.ltd": "Snack Video",
+    # New platforms. Domain aliases are intentionally explicit; extractor
+    # availability still depends on the actual URL and provider access rules.
+    "freereels.com": "FreeReels Drama", "freereels.net": "FreeReels Drama", "freereels.app": "FreeReels Drama",
+    "melolo.com": "Melolo TV", "melolo.tv": "Melolo TV", "melolo.app": "Melolo TV",
+    "pinedrama.com": "PineDrama", "pinedrama.app": "PineDrama", "pinedrama.net": "PineDrama",
+    "terabox.com": "TeraBox", "teraboxapp.com": "TeraBox", "terabox.app": "TeraBox",
+    "1024tera.com": "TeraBox", "4funbox.com": "TeraBox",
 }
 
 
@@ -145,8 +152,21 @@ def blocked_reason(platform: str, message: str):
         return "Instagram tidak memberikan media kepada server. Pastikan posting bersifat publik dan dapat dibuka tanpa login."
     if platform == "TikTok" and any(x in m for x in ("login", "captcha", "challenge", "blocked", "access denied")):
         return "TikTok menolak permintaan server. Coba tautan publik TikTok yang dapat dibuka tanpa login."
-    if "drm" in m or "protected" in m:
+    if "drm" in m or "protected" in m or "widevine" in m:
         return f"{platform} menandai media sebagai terlindungi/DRM dan tidak dapat diambil tanpa membypass perlindungan."
+    if platform in ("FreeReels Drama", "Melolo TV", "PineDrama") and any(
+        x in m for x in ("unsupported url", "no suitable extractor", "unable to download webpage", "login required", "sign in")
+    ):
+        return (
+            f"{platform} belum dapat diekstrak oleh yt-dlp untuk tautan ini. "
+            "Aplikasi mungkin memakai API aplikasi, login, atau DRM yang tidak didukung. "
+            "Gunakan tautan web publik yang resmi jika tersedia."
+        )
+    if platform == "TeraBox" and any(x in m for x in ("unsupported url", "no suitable extractor")):
+        return (
+            "Tautan TeraBox ini tidak dikenali oleh versi yt-dlp yang terpasang. "
+            "Coba tautan berbagi publik asli dari TeraBox; tautan yang memerlukan login atau kode akses mungkin tidak didukung."
+        )
     return None
 
 
