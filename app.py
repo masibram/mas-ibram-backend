@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import yt_dlp
 
 APP_NAME = "Mas Ibram Downloader Backend"
-VERSION = "8.0.0"
+VERSION = "8.1.0"
 DOWNLOAD_DIR = Path(os.getenv("DOWNLOAD_DIR", "/tmp/mas-ibram-downloads"))
 DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MUSIC_DB_PATH = Path(os.getenv("MUSIC_DB_PATH", "/data/mas_ibram_music.db"))
@@ -31,6 +31,7 @@ app.add_middleware(
 
 SUPPORTED = {
     "youtube.com": "YouTube", "youtu.be": "YouTube",
+    "shortdrama.tiktok.com": "PineDrama",
     "tiktok.com": "TikTok",
     "instagram.com": "Instagram",
     "facebook.com": "Facebook", "fb.watch": "Facebook",
@@ -40,11 +41,11 @@ SUPPORTED = {
     "snackvideo.com": "Snack Video", "snackvideo.in": "Snack Video", "snackvideo.ltd": "Snack Video",
     # New platforms. Domain aliases are intentionally explicit; extractor
     # availability still depends on the actual URL and provider access rules.
-    "freereels.com": "FreeReels Drama", "freereels.net": "FreeReels Drama", "freereels.app": "FreeReels Drama",
-    "melolo.com": "Melolo TV", "melolo.tv": "Melolo TV", "melolo.app": "Melolo TV",
+    "free-reels.com": "FreeReels Drama", "freereels.com": "FreeReels Drama", "freereels.net": "FreeReels Drama", "freereels.app": "FreeReels Drama",
+    "melolo.org": "Melolo TV", "melolo.com": "Melolo TV", "melolo.tv": "Melolo TV", "melolo.app": "Melolo TV",
     "pinedrama.com": "PineDrama", "pinedrama.app": "PineDrama", "pinedrama.net": "PineDrama",
     "terabox.com": "TeraBox", "teraboxapp.com": "TeraBox", "terabox.app": "TeraBox",
-    "1024tera.com": "TeraBox", "4funbox.com": "TeraBox",
+    "1024tera.com": "TeraBox", "1024terabox.com": "TeraBox", "4funbox.com": "TeraBox",
 }
 
 
